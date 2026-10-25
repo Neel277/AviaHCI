@@ -1,0 +1,39 @@
+{
+  "project": "AviaHCI",
+  "benchmark": {
+    "species": "Alpine Rock Ptarmigan",
+    "region": "Swiss Alps",
+    "scope_note": "Regional benchmark only; does not establish transferability to other species or geographic regions."
+  },
+  "input_schema": {
+    "presence_csv_required_columns": [
+      "longitude",
+      "latitude"
+    ],
+    "background_csv_required_columns": [
+      "longitude",
+      "latitude"
+    ],
+    "additional_predictors": [
+      "Replace with actual raster-derived predictor column names."
+    ],
+    "label_convention": {
+      "presence": 1,
+      "background": 0
+    }
+  },
+  "analysis_defaults": {
+    "model": "logistic_regression",
+    "repeats": 10,
+    "test_size": 0.2,
+    "block_degrees": 0.2,
+    "seed": 42,
+    "n_estimators": 500,
+    "background_sizes": [
+      500,
+      1000,
+      2000
+    ]
+  },
+  "important_note": "Illustrative starting configuration, not a validated scientific parameter set. Confirm predictor names, coordinate reference, sampling design, spatial block scale, and sample sizes before use."
+}

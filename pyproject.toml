@@ -1,0 +1,42 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "aviahci"
+version = "0.1.0"
+description = "A reproducible toolkit for habitat-change analysis and model robustness assessment."
+readme = "README.md"
+requires-python = ">=3.10"
+license = "MIT"
+authors = [
+    { name = "AviaHCI contributors" }
+]
+dependencies = [
+    "numpy>=1.24",
+    "pandas>=2.0",
+]
+
+[project.optional-dependencies]
+geospatial = [
+    "rasterio>=1.3",
+    "pyproj>=3.5",
+]
+modeling = [
+    "scikit-learn>=1.3",
+    "joblib>=1.3",
+]
+dev = [
+    "pytest>=7.4",
+    "build>=1.0",
+]
+
+[project.scripts]
+aviahci-analysis = "aviahci.analysis_cli:main"
+aviahci = "aviahci.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
