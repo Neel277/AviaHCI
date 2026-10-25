@@ -170,6 +170,43 @@ virtual environment:
 python -m pytest
 ```
 
+## Data Sources and Attribution
+
+AviaHCI's Alpine Rock Ptarmigan research benchmark uses environmental datasets from external providers. These datasets are separate from the AviaHCI software and retain their respective attribution requirements and terms of use.
+
+### ERA5-Land
+
+Climate data used in the research workflow were sourced from **ERA5-Land**, provided by the Copernicus Climate Change Service (C3S).
+
+**Dataset reference:**
+
+Muñoz Sabater, J. et al. (2021). ERA5-Land: A state-of-the-art global reanalysis dataset for land applications. *Earth System Science Data*, 13, 4349–4383.
+
+https://doi.org/10.5194/essd-13-4349-2021
+
+Climate Data Store dataset: https://doi.org/10.24381/cds.e2161bac
+
+**Attribution:** Contains modified Copernicus Climate Change Service information. Neither the European Commission nor ECMWF is responsible for any use that may be made of the Copernicus information or data it contains.
+
+### Shuttle Radar Topography Mission (SRTM)
+
+Elevation data used in the research workflow were sourced from the **Shuttle Radar Topography Mission (SRTM)**.
+
+For the NASA SRTM Global 1 arc-second Version 003 product:
+
+NASA JPL (2013). *NASA Shuttle Radar Topography Mission Global 1 arc second*. NASA Land Processes Distributed Active Archive Center.
+
+https://doi.org/10.5067/MEASURES/SRTM/SRTMGL1.003
+
+*Note: Confirm the exact SRTM product and version used in the benchmark before finalizing this citation.*
+
+### Dataset and Software Licensing
+
+The AviaHCI software licence applies to the software, subject to the rights and terms applicable to the included materials. It does not replace or override the terms governing external datasets.
+
+External datasets are not included with the software unless explicitly stated. Users should obtain data from the respective providers and comply with applicable attribution, citation, and usage requirements.
+
+
 Final release checks should include an end-to-end run with real study inputs,
 inspection of generated CSV and provenance files, and review of the Git diff
 before committing or pushing.
