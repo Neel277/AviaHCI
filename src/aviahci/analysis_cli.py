@@ -7,10 +7,12 @@ from pathlib import Path
 import pandas as pd
 
 from aviahci.provenance import build_provenance, write_provenance
+from aviahci.modeling import fit_model
 
 from aviahci.scenarios import (
     background_sampling_sensitivity,
     repeated_spatial_validation,
+    temperature_perturbation,
 )
 
 
@@ -82,6 +84,25 @@ def main(argv=None):
     background.add_argument("--n-estimators", type=int, default=500)
     background.add_argument("--output", required=True)
 
+    temperature = commands.add_parser(
+        "temperature-scenario",
+        help="Score scenario-grid cells under temperature perturbations.",
+    )
+    temperature.add_argument("training_csv")
+    temperature.add_argument("scenario_grid_csv")
+    temperature.add_argument("--predictors", nargs="+", required=True)
+    temperature.add_argument("--temperature-column", required=True)
+    temperature.add_argument("--deltas", nargs="+", type=float, required=True)
+    temperature.add_argument("--target", default="label")
+    temperature.add_argument(
+        "--model",
+        choices=["logistic_regression", "random_forest"],
+        default="logistic_regression",
+    )
+    temperature.add_argument("--seed", type=int, default=42)
+    temperature.add_argument("--n-estimators", type=int, default=500)
+    temperature.add_argument("--output", required=True)
+
     args = parser.parse_args(argv)
 
     try:
@@ -110,6 +131,72 @@ def main(argv=None):
                     "repeats": args.repeats,
                     "test_size": args.test_size,
                     "block_degrees": args.block_degrees,
+                    "seed": args.seed,
+                    "n_estimators": args.n_estimators,
+                },
+            )
+
+        elif args.command == "temperature-scenario":
+            training = _read_csv(args.training_csv)
+            grid = _read_csv(args.scenario_grid_csv)
+
+            required_training = set(args.predictors) | {args.target}
+            required_grid = set(args.predictors)
+            missing_training = required_training - set(training.columns)
+            missing_grid = required_grid - set(grid.columns)
+
+            if missing_training:
+                raise ValueError(
+                    f"Training CSV is missing columns: {sorted(missing_training)}"
+                )
+            if missing_grid:
+                raise ValueError(
+                    f"Scenario-grid CSV is missing columns: {sorted(missing_grid)}"
+                )
+            if grid.empty:
+                raise ValueError("Scenario-grid CSV contains no rows.")
+
+            model = fit_model(
+                X_train=training[args.predictors],
+                y_train=training[args.target],
+                model_name=args.model,
+                random_state=args.seed,
+                n_estimators=args.n_estimators,
+            )
+
+            scenario_results = temperature_perturbation(
+                model=model,
+                X=grid[args.predictors],
+                temperature_col=args.temperature_column,
+                deltas=args.deltas,
+            )
+
+            rows = []
+            for _, scenario in scenario_results.iterrows():
+                scores = scenario["scores"]
+                if len(scores) != len(grid):
+                    raise ValueError(
+                        "Scenario score count does not match scenario-grid rows."
+                    )
+                for row_index, score in enumerate(scores):
+                    rows.append({
+                        "scenario_row": row_index,
+                        "temperature_delta": float(scenario["temperature_delta"]),
+                        "score": float(score),
+                    })
+
+            results = pd.DataFrame(rows)
+            _write_results(
+                results,
+                args.output,
+                input_paths=[args.training_csv, args.scenario_grid_csv],
+                parameters={
+                    "command": args.command,
+                    "predictors": args.predictors,
+                    "target": args.target,
+                    "temperature_column": args.temperature_column,
+                    "deltas": args.deltas,
+                    "model": args.model,
                     "seed": args.seed,
                     "n_estimators": args.n_estimators,
                 },
